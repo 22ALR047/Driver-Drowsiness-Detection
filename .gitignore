@@ -1,0 +1,40 @@
+# Node / Frontend dependencies
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.eslintcache
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python environment and cache files
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+bin/
+lib/
+include/
+pip-selfcheck.json
+
+# Large Binary Data / Model weights
+*.dat
+*.task
+models/shape_predictor_68_face_landmarks.dat
+models/face_landmarker.task
+
+# Databases
+*.db
+backend/drowsishield.db
+
+# OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
