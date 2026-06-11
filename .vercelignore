@@ -1,0 +1,17 @@
+# Ignore backend and machine learning files to keep deployment small
+backend/
+models/
+assets/
+drownsiness_detection.ipynb
+Drowsiness_Detection.py
+Dockerfile
+docker-compose.yml
+evaluate_models.py
+__pycache__/
+scratch/
+node_modules/
+*.bat
+LICENSE.txt
+readme.md
+render.yaml
+requirements.txt

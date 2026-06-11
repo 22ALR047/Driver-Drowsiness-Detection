@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://driver-drowsiness-detection-v4p7.onrender.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

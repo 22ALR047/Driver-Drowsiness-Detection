@@ -38,3 +38,5 @@ backend/drowsishield.db
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+.vercel
