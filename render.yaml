@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: driver-drowsiness-backend
+    env: python
+    buildCommand: pip install -r Drowsiness_Detection/requirements.txt
+    startCommand: python Drowsiness_Detection/backend/server.py
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
