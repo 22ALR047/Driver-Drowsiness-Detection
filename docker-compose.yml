@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  drowsishield-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: drowsishield-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - drowsishield-data:/app/backend
+    restart: unless-stopped
+
+volumes:
+  drowsishield-data:

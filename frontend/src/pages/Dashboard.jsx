@@ -31,6 +31,10 @@ function Dashboard() {
   // ── Tab & Input Mode ────────────────────────────────────────────────────────
   const [activeTab, setActiveTab]   = useState('dashboard');
   const [inputMode, setInputMode]   = useState('webcam');
+  const [backendUrl, setBackendUrl] = useState(() => {
+    const saved = localStorage.getItem('drowsishield_backend_url');
+    return saved ? saved.replace(/\/$/, '') : window.location.origin.replace(/\/$/, '');
+  });
   const [uploadedImageName, setUploadedImageName] = useState(null);
   const [staticImage, setStaticImage] = useState(null);
   const [staticLandmarks, setStaticLandmarks] = useState(null);
@@ -120,18 +124,21 @@ function Dashboard() {
 
   // ── 1. Fetch Backend Evaluation Metrics ───────────────────────────────────── 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/evaluation')
+    fetch(`${backendUrl}/api/evaluation`)
       .then(res => res.json())
       .then(data => setEvalMetrics(data))
       .catch(() => addLog("Backend API offline. Using cached model metrics.", "warning"));
 
-    addLog("Dashboard initialized. Loading MediaPipe FaceMesh model...", "info");
     loadHistory();
+  }, [backendUrl]);
+
+  useEffect(() => {
+    addLog("Dashboard initialized. Loading MediaPipe FaceMesh model...", "info");
   }, []);
 
   // ── 2. Load Session History from SQLite ───────────────────────────────────── 
   const loadHistory = () => {
-    fetch(`http://127.0.0.1:5000/api/sessions?user_id=${userId}`)
+    fetch(`${backendUrl}/api/sessions?user_id=${userId}`)
       .then(res => res.json())
       .then(data => { if (Array.isArray(data)) setSessionHistory(data); })
       .catch(() => console.error("Failed to fetch sessions history"));
@@ -140,7 +147,7 @@ function Dashboard() {
   // ── 3. Save Session to Database ────────────────────────────────────────────── 
   const handleSaveSession = () => {
     const duration = Math.floor((Date.now() - sessionStart) / 1000);
-    fetch('http://127.0.0.1:5000/api/sessions', {
+    fetch(`${backendUrl}/api/sessions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -397,7 +404,7 @@ function Dashboard() {
       const curatedLms = [362,385,387,263,373,380,33,160,158,133,153,144,61,82,312,291,317,87,1,234,454]
         .map(idx => ({ x: lm[idx].x, y: lm[idx].y, z: lm[idx].z }));
 
-      const res = await fetch('http://127.0.0.1:5000/api/predict', {
+      const res = await fetch(`${backendUrl}/api/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: st.sessionId, frame: cropBase64, landmarks: curatedLms })
@@ -1257,6 +1264,35 @@ function Dashboard() {
                     <p>👁 Drowsy: eyes closed for <strong className="text-white">{CONSEC_FRAMES_EAR} frames</strong></p>
                     <p>🥱 Yawn: mouth open for <strong className="text-white">{CONSEC_FRAMES_MAR} frames</strong></p>
                     <p>👀 Distraction: head turned for <strong className="text-white">{CONSEC_FRAMES_YAW} frames</strong></p>
+                  </div>
+
+                  <div className="bg-white/[0.025] rounded-xl p-4 border border-white/[0.06] space-y-3">
+                    <p className="text-white font-semibold text-[12px]">API Settings</p>
+                    <p className="text-[10px] text-textSecondary">Set your backend API URL if hosted separately (e.g. Vercel frontend, local backend):</p>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={backendUrl} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setBackendUrl(val);
+                          localStorage.setItem('drowsishield_backend_url', val);
+                        }}
+                        className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white focus:outline-none focus:border-blue-500/50 font-mono"
+                        placeholder="http://localhost:5000"
+                      />
+                      <button 
+                        onClick={() => {
+                          const val = window.location.origin.replace(/\/$/, '');
+                          setBackendUrl(val);
+                          localStorage.removeItem('drowsishield_backend_url');
+                          addLog("Backend API URL reset to default origin.", "info");
+                        }}
+                        className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
+                      >
+                        Reset
+                      </button>
+                    </div>
                   </div>
 
                   <button onClick={() => { setEarThreshold(0.25); setMarThreshold(0.60); setYawTolerance(0.15); addLog("Settings restored to factory defaults.", "info"); }}
